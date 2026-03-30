@@ -1,0 +1,2509 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#667eea">
+    <title>فونت ستوديو</title>
+    
+    <!-- OpenType.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --dark: #1a1a2e;
+            --darker: #16162a;
+            --light: #edf2f7;
+            --success: #48bb78;
+            --warning: #ed8936;
+            --danger: #f56565;
+            --glass: rgba(255,255,255,0.1);
+            --glass-border: rgba(255,255,255,0.2);
+        }
+
+        @font-face {
+            font-family: 'Cairo';
+            src: url('https://fonts.gstatic.com/s/cairo/v28/SLXgc1nY6HkvangtZmpcWmhzfH5lWWgcQyyS4J0.woff2') format('woff2');
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--darker) 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* ===== SPLASH SCREEN ===== */
+        #splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        #splash.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #splash .logo {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 60px;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        #splash h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        #splash p {
+            opacity: 0.8;
+            font-size: 16px;
+        }
+
+        .splash-loader {
+            margin-top: 40px;
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title .icon {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+        }
+
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            border: none;
+            background: var(--glass);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .header-btn:hover {
+            background: var(--glass-border);
+            transform: scale(1.05);
+        }
+
+        /* ===== CANVAS AREA ===== */
+        .canvas-container {
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 350px;
+            background: var(--darker);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            background: repeating-conic-gradient(#333 0% 25%, #2a2a2a 0% 50%) 50% / 20px 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        #mainCanvas {
+            display: block;
+            max-width: 100%;
+            touch-action: none;
+        }
+
+        /* ===== TOOLBAR ===== */
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            padding: 15px 20px;
+            background: var(--dark);
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .toolbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tool-btn {
+            min-width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            background: var(--glass);
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .tool-btn span {
+            font-size: 10px;
+            opacity: 0.8;
+        }
+
+        .tool-btn:hover, .tool-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: white;
+            transform: scale(1.05);
+        }
+
+        /* ===== PANELS ===== */
+        .panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            max-height: 70vh;
+            background: var(--dark);
+            border-radius: 24px 24px 0 0;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 200;
+            overflow: hidden;
+        }
+
+        .panel.active {
+            transform: translateY(0);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            background: var(--dark);
+            z-index: 10;
+        }
+
+        .panel-header h3 {
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: var(--glass);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .panel-content {
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(70vh - 80px);
+        }
+
+        .panel-drag {
+            width: 40px;
+            height: 5px;
+            background: var(--glass-border);
+            border-radius: 3px;
+            margin: 10px auto 0;
+        }
+
+        /* ===== OPENTYPE FEATURES PANEL ===== */
+        .ot-features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .ot-feature {
+            background: var(--glass);
+            border: 2px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .ot-feature:hover {
+            border-color: var(--primary);
+        }
+
+        .ot-feature.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: white;
+        }
+
+        .ot-feature .code {
+            font-family: monospace;
+            font-size: 14px;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .ot-feature .name {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .ot-feature .name-ar {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        /* ===== TEXT INPUT ===== */
+        .text-input-container {
+            margin-bottom: 20px;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 16px;
+            border: 2px solid var(--glass-border);
+            background: var(--glass);
+            color: white;
+            font-size: 18px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .text-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* ===== SLIDERS ===== */
+        .slider-group {
+            margin-bottom: 20px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .slider-label span:first-child {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .slider-value {
+            background: var(--glass);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: monospace;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--glass);
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: 3px solid white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+        }
+
+        /* ===== COLOR PICKER ===== */
+        .color-picker-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .color-option {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .color-option:hover, .color-option.active {
+            transform: scale(1.1);
+            border-color: white;
+        }
+
+        .color-option.custom {
+            background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .color-option.custom input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* ===== FONT UPLOAD ===== */
+        .font-upload-area {
+            border: 3px dashed var(--glass-border);
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .font-upload-area:hover {
+            border-color: var(--primary);
+            background: var(--glass);
+        }
+
+        .font-upload-area .icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .font-upload-area h4 {
+            margin-bottom: 8px;
+        }
+
+        .font-upload-area p {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .font-upload-area input {
+            display: none;
+        }
+
+        /* ===== FONT LIST ===== */
+        .font-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .font-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: var(--glass);
+            border-radius: 16px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .font-item:hover, .font-item.active {
+            border-color: var(--primary);
+        }
+
+        .font-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .font-item .name {
+            font-size: 16px;
+        }
+
+        .font-item .info {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .font-item .features-count {
+            background: var(--glass);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        /* ===== LAYERS ===== */
+        .layer-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            background: var(--glass);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .layer-item:hover, .layer-item.active {
+            border-color: var(--primary);
+        }
+
+        .layer-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .layer-thumb {
+            width: 50px;
+            height: 50px;
+            background: var(--darker);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+        }
+
+        .layer-info {
+            flex: 1;
+        }
+
+        .layer-name {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .layer-type {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .layer-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .layer-actions button {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: var(--glass);
+            color: white;
+            cursor: pointer;
+        }
+
+        /* ===== IMAGE UPLOAD ===== */
+        .image-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .image-option {
+            padding: 25px 15px;
+            background: var(--glass);
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .image-option:hover {
+            border-color: var(--primary);
+            transform: scale(1.02);
+        }
+
+        .image-option .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .image-option input {
+            display: none;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--glass);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #38a169);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #e53e3e);
+            color: white;
+        }
+
+        /* ===== CANVAS SIZES ===== */
+        .canvas-sizes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .size-option {
+            padding: 15px 10px;
+            background: var(--glass);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .size-option:hover, .size-option.active {
+            border-color: var(--primary);
+        }
+
+        .size-option .icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .size-option .name {
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .size-option .dims {
+            font-size: 10px;
+            opacity: 0.7;
+        }
+
+        /* ===== TABS ===== */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            background: var(--glass);
+            padding: 5px;
+            border-radius: 12px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        /* ===== BACKDROP ===== */
+        .backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 150;
+            backdrop-filter: blur(5px);
+        }
+
+        .backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--dark);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.4s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            border-right: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-right: 4px solid var(--danger);
+        }
+
+        /* ===== VARIATION AXES ===== */
+        .variation-axes {
+            background: var(--glass);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .variation-axes h4 {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ===== PREVIEW TEXT ===== */
+        .preview-container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            min-height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #previewText {
+            font-size: 36px;
+            color: #333;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 380px) {
+            .tool-btn {
+                min-width: 55px;
+                height: 55px;
+                font-size: 20px;
+            }
+            
+            .ot-features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        /* ===== SHAPE TOOLS ===== */
+        .shapes-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .shape-btn {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            border: 2px solid var(--glass-border);
+            background: var(--glass);
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .shape-btn:hover, .shape-btn.active {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        /* ===== FILTER BUTTONS ===== */
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 15px 10px;
+            border-radius: 12px;
+            border: none;
+            background: var(--glass);
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .filter-btn .icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .filter-btn .name {
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <!-- SPLASH SCREEN -->
+    <div id="splash">
+        <div class="logo">🎨</div>
+        <h1>فونت ستوديو</h1>
+        <p>محرر الصور الاحترافي</p>
+        <div class="splash-loader"></div>
+    </div>
+
+    <!-- HEADER -->
+    <header>
+        <div class="header-title">
+            <div class="icon">🎨</div>
+            <h1>فونت ستوديو</h1>
+        </div>
+        <div class="header-actions">
+            <button class="header-btn" onclick="undo()" title="تراجع">↩️</button>
+            <button class="header-btn" onclick="redo()" title="إعادة">↪️</button>
+            <button class="header-btn" onclick="exportImage()" title="تصدير">💾</button>
+        </div>
+    </header>
+
+    <!-- CANVAS AREA -->
+    <div class="canvas-container">
+        <div class="canvas-wrapper">
+            <canvas id="mainCanvas" width="1080" height="1080"></canvas>
+        </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+        <button class="tool-btn" onclick="showPanel('canvasPanel')">
+            📐
+            <span>الحجم</span>
+        </button>
+        <button class="tool-btn" onclick="showPanel('imagePanel')">
+            🖼️
+            <span>صورة</span>
+        </button>
+        <button class="tool-btn active" onclick="showPanel('textPanel')">
+            ✏️
+            <span>نص</span>
+        </button>
+        <button class="tool-btn" onclick="showPanel('fontPanel')">
+            🔤
+            <span>الخط</span>
+        </button>
+        <button class="tool-btn" onclick="showPanel('otPanel')">
+            ⚙️
+            <span>OT</span>
+        </button>
+        <button class="tool-btn" onclick="showPanel('shapePanel')">
+            ⬡
+            <span>أشكال</span>
+        </button>
+        <button class="tool-btn" onclick="showPanel('layersPanel')">
+            📚
+            <span>طبقات</span>
+        </button>
+        <button class="tool-btn" onclick="showPanel('filterPanel')">
+            ✨
+            <span>فلاتر</span>
+        </button>
+    </div>
+
+    <!-- BACKDROP -->
+    <div class="backdrop" onclick="hideAllPanels()"></div>
+
+    <!-- CANVAS SIZE PANEL -->
+    <div class="panel" id="canvasPanel">
+        <div class="panel-drag"></div>
+        <div class="panel-header">
+            <h3>📐 حجم اللوحة</h3>
+            <button class="panel-close" onclick="hideAllPanels()">✕</button>
+        </div>
+        <div class="panel-content">
+            <div class="canvas-sizes">
+                <div class="size-option active" onclick="setCanvasSize(1080, 1080, this)">
+                    <div class="icon">📱</div>
+                    <div class="name">Instagram</div>
+                    <div class="dims">1080×1080</div>
+                </div>
+                <div class="size-option" onclick="setCanvasSize(1080, 1920, this)">
+                    <div class="icon">📱</div>
+                    <div class="name">Story</div>
+                    <div class="dims">1080×1920</div>
+                </div>
+                <div class="size-option" onclick="setCanvasSize(1200, 630, this)">
+                    <div class="icon">📘</div>
+                    <div class="name">Facebook</div>
+                    <div class="dims">1200×630</div>
+                </div>
+                <div class="size-option" onclick="setCanvasSize(1280, 720, this)">
+                    <div class="icon">📺</div>
+                    <div class="name">YouTube</div>
+                    <div class="dims">1280×720</div>
+                </div>
+                <div class="size-option" onclick="setCanvasSize(1500, 500, this)">
+                    <div class="icon">🐦</div>
+                    <div class="name">Twitter</div>
+                    <div class="dims">1500×500</div>
+                </div>
+                <div class="size-option" onclick="setCanvasSize(800, 600, this)">
+                    <div class="icon">🖥️</div>
+                    <div class="name">Standard</div>
+                    <div class="dims">800×600</div>
+                </div>
+            </div>
+            
+            <h4 style="margin-bottom: 15px;">أو حجم مخصص:</h4>
+            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <div style="flex: 1;">
+                    <label style="font-size: 14px; opacity: 0.8;">العرض</label>
+                    <input type="number" id="customWidth" value="1080" class="text-input" style="min-height: auto; padding: 12px;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-size: 14px; opacity: 0.8;">الارتفاع</label>
+                    <input type="number" id="customHeight" value="1080" class="text-input" style="min-height: auto; padding: 12px;">
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="applyCustomSize()">
+                ✓ تطبيق الحجم
+            </button>
+        </div>
+    </div>
+
+    <!-- IMAGE PANEL -->
+    <div class="panel" id="imagePanel">
+        <div class="panel-drag"></div>
+        <div class="panel-header">
+            <h3>🖼️ إضافة صورة</h3>
+            <button class="panel-close" onclick="hideAllPanels()">✕</button>
+        </div>
+        <div class="panel-content">
+            <div class="image-options">
+                <label class="image-option">
+                    <div class="icon">📁</div>
+                    <div>من الجهاز</div>
+                    <input type="file" accept="image/*" onchange="loadImage(event)">
+                </label>
+                <label class="image-option">
+                    <div class="icon">📷</div>
+                    <div>الكاميرا</div>
+                    <input type="file" accept="image/*" capture="camera" onchange="loadImage(event)">
+                </label>
+            </div>
+            
+            <div class="slider-group" style="margin-top: 20px;">
+                <div class="slider-label">
+                    <span>شفافية الصورة</span>
+                    <span class="slider-value" id="imageOpacityValue">100%</span>
+                </div>
+                <input type="range" class="slider" min="0" max="100" value="100" id="imageOpacity" oninput="updateImageOpacity(this.value)">
+            </div>
+
+            <button class="btn btn-danger" onclick="removeBackgroundImage()" style="margin-top: 10px;">
+                🗑️ إزالة الصورة
+            </button>
+        </div>
+    </div>
+
+    <!-- TEXT PANEL -->
+    <div class="panel" id="textPanel">
+        <div class="panel-drag"></div>
+        <div class="panel-header">
+            <h3>✏️ إضافة نص</h3>
+            <button class="panel-close" onclick="hideAllPanels()">✕</button>
+        </div>
+        <div class="panel-content">
+            <div class="text-input-container">
+                <textarea class="text-input" id="textInput" placeholder="اكتب النص هنا..." oninput="updateText()">فونت ستوديو</textarea>
+            </div>
+            
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span>حجم الخط</span>
+                    <span class="slider-value" id="fontSizeValue">72px</span>
+                </div>
+                <input type="range" class="slider" min="12" max="200" value="72" id="fontSize" oninput="updateFontSize(this.value)">
+            </div>
+            
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span>تباعد الأحرف</span>
+                    <span class="slider-value" id="letterSpacingValue">0px</span>
+                </div>
+                <input type="range" class="slider" min="-20" max="50" value="0" id="letterSpacing" oninput="updateLetterSpacing(this.value)">
+            </div>
+            
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span>ارتفاع السطر</span>
+                    <span class="slider-value" id="lineHeightValue">1.4</span>
+                </div>
+                <input type="range" class="slider" min="80" max="300" value="140" id="lineHeight" oninput="updateLineHeight(this.value)">
+            </div>
+            
+            <h4 style="margin: 20px 0 15px;">لون النص</h4>
+            <div class="color-picker-container" id="textColors">
+                <div class="color-option active" style="background: #ffffff;" onclick="setTextColor('#ffffff', this)"></div>
+                <div class="color-option" style="background: #000000;" onclick="setTextColor('#000000', this)"></div>
+                <div class="color-option" style="background: #667eea;" onclick="setTextColor('#667eea', this)"></div>
+                <div class="color-option" style="background: #f56565;" onclick="setTextColor('#f56565', this)"></div>
+                <div class="color-option" style="background: #48bb78;" onclick="setTextColor('#48bb78', this)"></div>
+                <div class="color-option" style="background: #ed8936;" onclick="setTextColor('#ed8936', this)"></div>
+                <div class="color-option" style="background: #9f7aea;" onclick="setTextColor('#9f7aea', this)"></div>
+                <div class="color-option" style="background: #38b2ac;" onclick="setTextColor('#38b2ac', this)"></div>
+                <div class="color-option custom">
+                    <input type="color" value="#ffffff" onchange="setTextColor(this.value, this.parentElement)">
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="addTextLayer()">
+                ➕ إضافة كطبقة جديدة
+            </button>
+        </div>
+    </div>
+
+    <!-- FONT PANEL -->
+    <div class="panel" id="fontPanel">
+        <div class="panel-drag"></div>
+        <div class="panel-header">
+            <h3>🔤 الخطوط</h3>
+            <button class="panel-close" onclick="hideAllPanels()">✕</button>
+        </div>
+        <div class="panel-content">
+            <label class="font-upload-area">
+                <div class="icon">📤</div>
+                <h4>ارفع خط جديد</h4>
+                <p>TTF, OTF, WOFF, WOFF2</p>
+                <input type="file" accept=".ttf,.otf,.woff,.woff2" onchange="loadFont(event)">
+            </label>
+            
+            <h4 style="margin-bottom: 15px;">الخطوط المتاحة:</h4>
+            <div class="font-list" id="fontList">
+                <div class="font-item active" onclick="selectFont('Cairo', this)">
+                    <div>
+                        <div class="name">Cairo</div>
+                        <div class="info">خط عربي افتراضي</div>
+                    </div>
+                    <div class="features-count">5 خصائص</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPENTYPE FEATURES PANEL -->
+    <div class="panel" id="otPanel">
+        <div class="panel-drag"></div>
+        <div class="panel-header">
+            <h3>⚙️ خصائص OpenType</h3>
+            <button class="panel-close" onclick="hideAllPanels()">✕</button>
+        </div>
+        <div class="panel-content">
+            <!-- Preview -->
+            <div class="preview-container">
+                <div id="previewText">فونت ستوديو</div>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="showOTTab('ligatures', this)">الربط</button>
+                <button class="tab" onclick="showOTTab('stylistic', this)">الأنماط</button>
+                <button class="tab" onclick="showOTTab('numbers', this)">الأرقام</button>
+                <button class="tab" onclick="showOTTab('arabic', this)">عربي</button>
+            </div>
+            
+            <!-- Ligatures Tab -->
+            <div class="ot-tab-content" id="ligatures">
+                <div class="ot-features-grid">
+                    <div class="ot-feature active" onclick="toggleOTFeature('liga', this)">
+                        <div class="code">liga</div>
+                        <div class="name">Standard Ligatures</div>
+                        <div class="name-ar">الحروف المتصلة القياسية</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('dlig', this)">
+                        <div class="code">dlig</div>
+                        <div class="name">Discretionary Ligatures</div>
+                        <div class="name-ar">الحروف المتصلة الاختيارية</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('calt', this)">
+                        <div class="code">calt</div>
+                        <div class="name">Contextual Alternates</div>
+                        <div class="name-ar">البدائل السياقية</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('clig', this)">
+                        <div class="code">clig</div>
+                        <div class="name">Contextual Ligatures</div>
+                        <div class="name-ar">الربط السياقي</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('rlig', this)">
+                        <div class="code">rlig</div>
+                        <div class="name">Required Ligatures</div>
+                        <div class="name-ar">الربط الإلزامي</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('hlig', this)">
+                        <div class="code">hlig</div>
+                        <div class="name">Historical Ligatures</div>
+                        <div class="name-ar">الربط التاريخي</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stylistic Tab -->
+            <div class="ot-tab-content" id="stylistic" style="display: none;">
+                <div class="ot-features-grid">
+                    <div class="ot-feature" onclick="toggleOTFeature('ss01', this)">
+                        <div class="code">ss01</div>
+                        <div class="name">Stylistic Set 1</div>
+                        <div class="name-ar">النمط الأول</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('ss02', this)">
+                        <div class="code">ss02</div>
+                        <div class="name">Stylistic Set 2</div>
+                        <div class="name-ar">النمط الثاني</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('ss03', this)">
+                        <div class="code">ss03</div>
+                        <div class="name">Stylistic Set 3</div>
+                        <div class="name-ar">النمط الثالث</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('ss04', this)">
+                        <div class="code">ss04</div>
+                        <div class="name">Stylistic Set 4</div>
+                        <div class="name-ar">النمط الرابع</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('ss05', this)">
+                        <div class="code">ss05</div>
+                        <div class="name">Stylistic Set 5</div>
+                        <div class="name-ar">النمط الخامس</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('ss06', this)">
+                        <div class="code">ss06</div>
+                        <div class="name">Stylistic Set 6</div>
+                        <div class="name-ar">النمط السادس</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('swsh', this)">
+                        <div class="code">swsh</div>
+                        <div class="name">Swash</div>
+                        <div class="name-ar">الزخرفة المنحنية</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('salt', this)">
+                        <div class="code">salt</div>
+                        <div class="name">Stylistic Alternates</div>
+                        <div class="name-ar">البدائل الأسلوبية</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('ornm', this)">
+                        <div class="code">ornm</div>
+                        <div class="name">Ornaments</div>
+                        <div class="name-ar">الزخارف</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('titl', this)">
+                        <div class="code">titl</div>
+                        <div class="name">Titling</div>
+                        <div class="name-ar">العناوين</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Numbers Tab -->
+            <div class="ot-tab-content" id="numbers" style="display: none;">
+                <div class="ot-features-grid">
+                    <div class="ot-feature" onclick="toggleOTFeature('lnum', this)">
+                        <div class="code">lnum</div>
+                        <div class="name">Lining Numerals</div>
+                        <div class="name-ar">أرقام بارتفاع موحد</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('onum', this)">
+                        <div class="code">onum</div>
+                        <div class="name">Old-style Numerals</div>
+                        <div class="name-ar">الأرقام الكلاسيكية</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('pnum', this)">
+                        <div class="code">pnum</div>
+                        <div class="name">Proportional Numerals</div>
+                        <div class="name-ar">أرقام متناسبة</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('tnum', this)">
+                        <div class="code">tnum</div>
+                        <div class="name">Tabular Numerals</div>
+                        <div class="name-ar">أرقام جدولية</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('frac', this)">
+                        <div class="code">frac</div>
+                        <div class="name">Fractions</div>
+                        <div class="name-ar">الكسور</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('afrc', this)">
+                        <div class="code">afrc</div>
+                        <div class="name">Alternative Fractions</div>
+                        <div class="name-ar">كسور بديلة</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('subs', this)">
+                        <div class="code">subs</div>
+                        <div class="name">Subscript</div>
+                        <div class="name-ar">حرف سفلي</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('sups', this)">
+                        <div class="code">sups</div>
+                        <div class="name">Superscript</div>
+                        <div class="name-ar">حرف علوي</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('ordn', this)">
+                        <div class="code">ordn</div>
+                        <div class="name">Ordinals</div>
+                        <div class="name-ar">الأرقام الترتيبية</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('zero', this)">
+                        <div class="code">zero</div>
+                        <div class="name">Slashed Zero</div>
+                        <div class="name-ar">الصفر المشطوب</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Arabic Tab -->
+            <div class="ot-tab-content" id="arabic" style="display: none;">
+                <div class="ot-features-grid">
+                    <div class="ot-feature active" onclick="toggleOTFeature('init', this)">
+                        <div class="code">init</div>
+                        <div class="name">Initial Forms</div>
+                        <div class="name-ar">الأشكال الابتدائية</div>
+                    </div>
+                    <div class="ot-feature active" onclick="toggleOTFeature('medi', this)">
+                        <div class="code">medi</div>
+                        <div class="name">Medial Forms</div>
+                        <div class="name-ar">الأشكال الوسطى</div>
+                    </div>
+                    <div class="ot-feature active" onclick="toggleOTFeature('fina', this)">
+                        <div class="code">fina</div>
+                        <div class="name">Final Forms</div>
+                        <div class="name-ar">الأشكال النهائية</div>
+                    </div>
+                    <div class="ot-feature active" onclick="toggleOTFeature('isol', this)">
+                        <div class="code">isol</div>
+                        <div class="name">Isolated Forms</div>
+                        <div class="name-ar">الأشكال المنفصلة</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('cswh', this)">
+                        <div class="code">cswh</div>
+                        <div class="name">Contextual Swash</div>
+                        <div class="name-ar">الزخرفة السياقية</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('mset', this)">
+                        <div class="code">mset</div>
+                        <div class="name">Mark Positioning</div>
+                        <div class="name-ar">موضع التشكيل</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('rclt', this)">
+                        <div class="code">rclt</div>
+                        <div class="name">Required Contextual</div>
+                        <div class="name-ar">السياق الإلزامي</div>
+                    </div>
+                    <div class="ot-feature" onclick="toggleOTFeature('anum', this)">
+                        <div class="code">anum</div>
+                        <div class="name">Arabic Numerals</div>
+                        <div class="name-ar">الأرقام العربية</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Variable Font Axes -->
+            <div class="variation-axes" id="variableAxes" style="display: none;">
+                <h4>🎚️ محاور الخط المتغير</h4>
+                <div id="axesSliders"></div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="applyOTFeatures()" style="margin-top: 20px;">
+                ✓ تطبيق الخصائص
+            </button>
+        </div>
+    </div>
+
+    <!-- SHAPES PANEL -->
+    <div class="panel" id="shapePanel">
+        <div class="panel-drag"></div>
+        <div class="panel-header">
+            <h3>⬡ الأشكال</h3>
+            <button class="panel-close" onclick="hideAllPanels()">✕</button>
+        </div>
+        <div class="panel-content">
+            <div class="shapes-grid">
+                <button class="shape-btn" onclick="addShape('rectangle')">▬</button>
+                <button class="shape-btn" onclick="addShape('square')">⬜</button>
+                <button class="shape-btn" onclick="addShape('circle')">⬤</button>
+                <button class="shape-btn" onclick="addShape('triangle')">▲</button>
+                <button class="shape-btn" onclick="addShape('star')">★</button>
+                <button class="shape-btn" onclick="addShape('heart')">❤</button>
+                <button class="shape-btn" onclick="addShape('arrow')">➤</button>
+                <button class="shape-btn" onclick="addShape('hexagon')">⬡</button>
+            </div>
+            
+            <h4 style="margin: 20px 0 15px;">لون الشكل</h4>
+            <div class="color-picker-container" id="shapeColors">
+                <div class="color-option active" style="background: #667eea;" onclick="setShapeColor('#667eea', this)"></div>
+                <div class="color-option" style="background: #f56565;" onclick="setShapeColor('#f56565', this)"></div>
+                <div class="color-option" style="background: #48bb78;" onclick="setShapeColor('#48bb78', this)"></div>
+                <div class="color-option" style="background: #ed8936;" onclick="setShapeColor('#ed8936', this)"></div>
+                <div class="color-option" style="background: #ffffff;" onclick="setShapeColor('#ffffff', this)"></div>
+                <div class="color-option" style="background: #000000;" onclick="setShapeColor('#000000', this)"></div>
+                <div class="color-option custom">
+                    <input type="color" value="#667eea" onchange="setShapeColor(this.value, this.parentElement)">
+                </div>
+            </div>
+            
+            <div class="slider-group" style="margin-top: 20px;">
+                <div class="slider-label">
+                    <span>شفافية الشكل</span>
+                    <span class="slider-value" id="shapeOpacityValue">100%</span>
+                </div>
+                <input type="range" class="slider" min="0" max="100" value="100" id="shapeOpacity" oninput="updateShapeOpacity(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <!-- LAYERS PANEL -->
+    <div class="panel" id="layersPanel">
+        <div class="panel-drag"></div>
+        <div class="panel-header">
+            <h3>📚 الطبقات</h3>
+            <button class="panel-close" onclick="hideAllPanels()">✕</button>
+        </div>
+        <div class="panel-content">
+            <div id="layersList">
+                <!-- Layers will be dynamically added here -->
+            </div>
+            
+            <button class="btn btn-secondary" onclick="clearAllLayers()" style="margin-top: 20px;">
+                🗑️ مسح جميع الطبقات
+            </button>
+        </div>
+    </div>
+
+    <!-- FILTER PANEL -->
+    <div class="panel" id="filterPanel">
+        <div class="panel-drag"></div>
+        <div class="panel-header">
+            <h3>✨ الفلاتر والتأثيرات</h3>
+            <button class="panel-close" onclick="hideAllPanels()">✕</button>
+        </div>
+        <div class="panel-content">
+            <div class="filters-grid">
+                <button class="filter-btn" onclick="applyFilter('none')">
+                    <div class="icon">🚫</div>
+                    <div class="name">بدون</div>
+                </button>
+                <button class="filter-btn" onclick="applyFilter('grayscale')">
+                    <div class="icon">⚫</div>
+                    <div class="name">رمادي</div>
+                </button>
+                <button class="filter-btn" onclick="applyFilter('sepia')">
+                    <div class="icon">🟤</div>
+                    <div class="name">بني</div>
+                </button>
+                <button class="filter-btn" onclick="applyFilter('blur')">
+                    <div class="icon">🌫️</div>
+                    <div class="name">ضبابي</div>
+                </button>
+                <button class="filter-btn" onclick="applyFilter('brightness')">
+                    <div class="icon">☀️</div>
+                    <div class="name">إضاءة</div>
+                </button>
+                <button class="filter-btn" onclick="applyFilter('contrast')">
+                    <div class="icon">◐</div>
+                    <div class="name">تباين</div>
+                </button>
+                <button class="filter-btn" onclick="applyFilter('saturate')">
+                    <div class="icon">🌈</div>
+                    <div class="name">تشبع</div>
+                </button>
+                <button class="filter-btn" onclick="applyFilter('invert')">
+                    <div class="icon">🔄</div>
+                    <div class="name">عكس</div>
+                </button>
+                <button class="filter-btn" onclick="applyFilter('hue')">
+                    <div class="icon">🎨</div>
+                    <div class="name">صبغة</div>
+                </button>
+            </div>
+            
+            <div class="slider-group" style="margin-top: 20px;">
+                <div class="slider-label">
+                    <span>شدة الفلتر</span>
+                    <span class="slider-value" id="filterIntensityValue">100%</span>
+                </div>
+                <input type="range" class="slider" min="0" max="200" value="100" id="filterIntensity" oninput="updateFilterIntensity(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ===== GLOBAL STATE =====
+        const state = {
+            canvas: null,
+            ctx: null,
+            layers: [],
+            selectedLayer: null,
+            currentFont: 'Cairo',
+            fontSize: 72,
+            textColor: '#ffffff',
+            shapeColor: '#667eea',
+            letterSpacing: 0,
+            lineHeight: 1.4,
+            otFeatures: {
+                liga: true,
+                init: true,
+                medi: true,
+                fina: true,
+                isol: true
+            },
+            variableAxes: {},
+            backgroundImage: null,
+            imageOpacity: 1,
+            currentFilter: 'none',
+            filterIntensity: 100,
+            history: [],
+            historyIndex: -1,
+            loadedFonts: [{
+                name: 'Cairo',
+                family: 'Cairo',
+                features: ['liga', 'kern', 'calt', 'init', 'medi']
+            }],
+            openTypeFont: null,
+            isDragging: false,
+            dragLayer: null,
+            dragOffset: { x: 0, y: 0 }
+        };
+
+        // ===== INITIALIZATION =====
+        window.onload = function() {
+            setTimeout(() => {
+                document.getElementById('splash').classList.add('hidden');
+            }, 2000);
+            
+            initCanvas();
+            renderCanvas();
+            setupTouchEvents();
+        };
+
+        function initCanvas() {
+            state.canvas = document.getElementById('mainCanvas');
+            state.ctx = state.canvas.getContext('2d');
+            
+            // Set initial canvas size for mobile
+            const containerWidth = window.innerWidth - 40;
+            const ratio = state.canvas.height / state.canvas.width;
+            state.canvas.style.width = Math.min(containerWidth, 500) + 'px';
+            state.canvas.style.height = (Math.min(containerWidth, 500) * ratio) + 'px';
+        }
+
+        // ===== CANVAS OPERATIONS =====
+        function setCanvasSize(width, height, element) {
+            document.querySelectorAll('.size-option').forEach(el => el.classList.remove('active'));
+            if (element) element.classList.add('active');
+            
+            state.canvas.width = width;
+            state.canvas.height = height;
+            
+            const containerWidth = window.innerWidth - 40;
+            const ratio = height / width;
+            state.canvas.style.width = Math.min(containerWidth, 500) + 'px';
+            state.canvas.style.height = (Math.min(containerWidth, 500) * ratio) + 'px';
+            
+            renderCanvas();
+            showToast('تم تغيير حجم اللوحة', 'success');
+        }
+
+        function applyCustomSize() {
+            const width = parseInt(document.getElementById('customWidth').value) || 1080;
+            const height = parseInt(document.getElementById('customHeight').value) || 1080;
+            setCanvasSize(width, height, null);
+            hideAllPanels();
+        }
+
+        function renderCanvas() {
+            const ctx = state.ctx;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, state.canvas.width, state.canvas.height);
+            
+            // Draw background (white or image)
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, state.canvas.width, state.canvas.height);
+            
+            // Draw background image if exists
+            if (state.backgroundImage) {
+                ctx.save();
+                ctx.globalAlpha = state.imageOpacity;
+                
+                // Fit image to canvas
+                const imgRatio = state.backgroundImage.width / state.backgroundImage.height;
+                const canvasRatio = state.canvas.width / state.canvas.height;
+                
+                let drawWidth, drawHeight, drawX, drawY;
+                
+                if (imgRatio > canvasRatio) {
+                    drawHeight = state.canvas.height;
+                    drawWidth = drawHeight * imgRatio;
+                    drawX = (state.canvas.width - drawWidth) / 2;
+                    drawY = 0;
+                } else {
+                    drawWidth = state.canvas.width;
+                    drawHeight = drawWidth / imgRatio;
+                    drawX = 0;
+                    drawY = (state.canvas.height - drawHeight) / 2;
+                }
+                
+                ctx.drawImage(state.backgroundImage, drawX, drawY, drawWidth, drawHeight);
+                ctx.restore();
+            }
+            
+            // Apply filter
+            if (state.currentFilter !== 'none') {
+                applyCanvasFilter();
+            }
+            
+            // Draw all layers
+            state.layers.forEach((layer, index) => {
+                if (!layer.visible) return;
+                
+                ctx.save();
+                ctx.globalAlpha = layer.opacity || 1;
+                
+                if (layer.type === 'text') {
+                    drawTextLayer(ctx, layer);
+                } else if (layer.type === 'shape') {
+                    drawShapeLayer(ctx, layer);
+                } else if (layer.type === 'image') {
+                    drawImageLayer(ctx, layer);
+                }
+                
+                ctx.restore();
+            });
+            
+            // Draw selection handles for selected layer
+            if (state.selectedLayer !== null && state.layers[state.selectedLayer]) {
+                drawSelectionHandles(state.layers[state.selectedLayer]);
+            }
+        }
+
+        function drawTextLayer(ctx, layer) {
+            const fontFeatures = buildFontFeatures();
+            
+            ctx.font = `${layer.fontSize || state.fontSize}px "${layer.font || state.currentFont}"`;
+            ctx.fillStyle = layer.color || state.textColor;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Apply OpenType features via CSS font-feature-settings
+            // Note: Canvas doesn't directly support font-feature-settings
+            // We use opentype.js for advanced features
+            
+            const lines = layer.text.split('\n');
+            const lineHeight = (layer.lineHeight || state.lineHeight) * (layer.fontSize || state.fontSize);
+            
+            lines.forEach((line, i) => {
+                const y = layer.y + (i - (lines.length - 1) / 2) * lineHeight;
+                
+                // Apply letter spacing
+                if (layer.letterSpacing || state.letterSpacing) {
+                    drawTextWithSpacing(ctx, line, layer.x, y, layer.letterSpacing || state.letterSpacing);
+                } else {
+                    ctx.fillText(line, layer.x, y);
+                }
+            });
+            
+            // Store bounds for selection
+            const metrics = ctx.measureText(layer.text);
+            layer.width = metrics.width + 40;
+            layer.height = lines.length * lineHeight + 40;
+        }
+
+        function drawTextWithSpacing(ctx, text, x, y, spacing) {
+            const chars = text.split('');
+            let currentX = x - (text.length * spacing) / 2;
+            
+            chars.forEach(char => {
+                ctx.fillText(char, currentX, y);
+                currentX += ctx.measureText(char).width + spacing;
+            });
+        }
+
+        function drawShapeLayer(ctx, layer) {
+            ctx.fillStyle = layer.color;
+            ctx.strokeStyle = layer.strokeColor || layer.color;
+            ctx.lineWidth = layer.strokeWidth || 2;
+            
+            const x = layer.x;
+            const y = layer.y;
+            const size = layer.size || 100;
+            
+            ctx.beginPath();
+            
+            switch (layer.shape) {
+                case 'rectangle':
+                    ctx.rect(x - size, y - size/2, size * 2, size);
+                    break;
+                case 'square':
+                    ctx.rect(x - size/2, y - size/2, size, size);
+                    break;
+                case 'circle':
+                    ctx.arc(x, y, size/2, 0, Math.PI * 2);
+                    break;
+                case 'triangle':
+                    ctx.moveTo(x, y - size/2);
+                    ctx.lineTo(x + size/2, y + size/2);
+                    ctx.lineTo(x - size/2, y + size/2);
+                    ctx.closePath();
+                    break;
+                case 'star':
+                    drawStar(ctx, x, y, 5, size/2, size/4);
+                    break;
+                case 'heart':
+                    drawHeart(ctx, x, y, size);
+                    break;
+                case 'arrow':
+                    drawArrow(ctx, x, y, size);
+                    break;
+                case 'hexagon':
+                    drawPolygon(ctx, x, y, size/2, 6);
+                    break;
+            }
+            
+            ctx.fill();
+            
+            layer.width = size * 2;
+            layer.height = size * 2;
+        }
+
+        function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
+            let rot = Math.PI / 2 * 3;
+            let step = Math.PI / spikes;
+            
+            ctx.moveTo(cx, cy - outerRadius);
+            
+            for (let i = 0; i < spikes; i++) {
+                ctx.lineTo(cx + Math.cos(rot) * outerRadius, cy + Math.sin(rot) * outerRadius);
+                rot += step;
+                ctx.lineTo(cx + Math.cos(rot) * innerRadius, cy + Math.sin(rot) * innerRadius);
+                rot += step;
+            }
+            
+            ctx.lineTo(cx, cy - outerRadius);
+            ctx.closePath();
+        }
+
+        function drawHeart(ctx, x, y, size) {
+            const s = size / 100;
+            ctx.moveTo(x, y + 30 * s);
+            ctx.bezierCurveTo(x, y + 27 * s, x - 5 * s, y + 20 * s, x - 25 * s, y + 20 * s);
+            ctx.bezierCurveTo(x - 55 * s, y + 20 * s, x - 55 * s, y + 57.5 * s, x - 55 * s, y + 57.5 * s);
+            ctx.bezierCurveTo(x - 55 * s, y + 80 * s, x - 35 * s, y + 102 * s, x, y + 130 * s);
+            ctx.bezierCurveTo(x + 35 * s, y + 102 * s, x + 55 * s, y + 80 * s, x + 55 * s, y + 57.5 * s);
+            ctx.bezierCurveTo(x + 55 * s, y + 57.5 * s, x + 55 * s, y + 20 * s, x + 25 * s, y + 20 * s);
+            ctx.bezierCurveTo(x + 10 * s, y + 20 * s, x, y + 27 * s, x, y + 30 * s);
+        }
+
+        function drawArrow(ctx, x, y, size) {
+            const s = size / 100;
+            ctx.moveTo(x + 50 * s, y);
+            ctx.lineTo(x - 20 * s, y - 30 * s);
+            ctx.lineTo(x - 20 * s, y - 15 * s);
+            ctx.lineTo(x - 50 * s, y - 15 * s);
+            ctx.lineTo(x - 50 * s, y + 15 * s);
+            ctx.lineTo(x - 20 * s, y + 15 * s);
+            ctx.lineTo(x - 20 * s, y + 30 * s);
+            ctx.closePath();
+        }
+
+        function drawPolygon(ctx, x, y, radius, sides) {
+            ctx.moveTo(x + radius * Math.cos(0), y + radius * Math.sin(0));
+            for (let i = 1; i <= sides; i++) {
+                ctx.lineTo(
+                    x + radius * Math.cos(i * 2 * Math.PI / sides),
+                    y + radius * Math.sin(i * 2 * Math.PI / sides)
+                );
+            }
+        }
+
+        function drawImageLayer(ctx, layer) {
+            if (layer.image) {
+                ctx.drawImage(layer.image, layer.x - layer.width/2, layer.y - layer.height/2, layer.width, layer.height);
+            }
+        }
+
+        function drawSelectionHandles(layer) {
+            if (!layer) return;
+            
+            const ctx = state.ctx;
+            const padding = 10;
+            const handleSize = 12;
+            
+            const bounds = {
+                x: layer.x - (layer.width || 100) / 2 - padding,
+                y: layer.y - (layer.height || 50) / 2 - padding,
+                width: (layer.width || 100) + padding * 2,
+                height: (layer.height || 50) + padding * 2
+            };
+            
+            // Draw selection rectangle
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            ctx.setLineDash([]);
+            
+            // Draw corner handles
+            ctx.fillStyle = '#667eea';
+            const handles = [
+                { x: bounds.x, y: bounds.y },
+                { x: bounds.x + bounds.width, y: bounds.y },
+                { x: bounds.x, y: bounds.y + bounds.height },
+                { x: bounds.x + bounds.width, y: bounds.y + bounds.height }
+            ];
+            
+            handles.forEach(handle => {
+                ctx.beginPath();
+                ctx.arc(handle.x, handle.y, handleSize / 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        // ===== TEXT OPERATIONS =====
+        function updateText() {
+            const text = document.getElementById('textInput').value;
+            document.getElementById('previewText').innerText = text || 'فونت ستوديو';
+            
+            if (state.selectedLayer !== null && state.layers[state.selectedLayer]?.type === 'text') {
+                state.layers[state.selectedLayer].text = text;
+                renderCanvas();
+            }
+        }
+
+        function updateFontSize(value) {
+            state.fontSize = parseInt(value);
+            document.getElementById('fontSizeValue').innerText = value + 'px';
+            document.getElementById('previewText').style.fontSize = value + 'px';
+            
+            if (state.selectedLayer !== null && state.layers[state.selectedLayer]?.type === 'text') {
+                state.layers[state.selectedLayer].fontSize = state.fontSize;
+                renderCanvas();
+            }
+        }
+
+        function updateLetterSpacing(value) {
+            state.letterSpacing = parseInt(value);
+            document.getElementById('letterSpacingValue').innerText = value + 'px';
+            document.getElementById('previewText').style.letterSpacing = value + 'px';
+            
+            if (state.selectedLayer !== null && state.layers[state.selectedLayer]?.type === 'text') {
+                state.layers[state.selectedLayer].letterSpacing = state.letterSpacing;
+                renderCanvas();
+            }
+        }
+
+        function updateLineHeight(value) {
+            const lineHeight = value / 100;
+            state.lineHeight = lineHeight;
+            document.getElementById('lineHeightValue').innerText = lineHeight.toFixed(1);
+            document.getElementById('previewText').style.lineHeight = lineHeight;
+            
+            if (state.selectedLayer !== null && state.layers[state.selectedLayer]?.type === 'text') {
+                state.layers[state.selectedLayer].lineHeight = state.lineHeight;
+                renderCanvas();
+            }
+        }
+
+        function setTextColor(color, element) {
+            state.textColor = color;
+            document.querySelectorAll('#textColors .color-option').forEach(el => el.classList.remove('active'));
+            if (element) element.classList.add('active');
+            
+            document.getElementById('previewText').style.color = color;
+            
+            if (state.selectedLayer !== null && state.layers[state.selectedLayer]?.type === 'text') {
+                state.layers[state.selectedLayer].color = color;
+                renderCanvas();
+            }
+        }
+
+        function addTextLayer() {
+            const text = document.getElementById('textInput').value || 'نص جديد';
+            
+            saveHistory();
+            
+            state.layers.push({
+                type: 'text',
+                text: text,
+                x: state.canvas.width / 2,
+                y: state.canvas.height / 2,
+                font: state.currentFont,
+                fontSize: state.fontSize,
+                color: state.textColor,
+                letterSpacing: state.letterSpacing,
+                lineHeight: state.lineHeight,
+                opacity: 1,
+                visible: true,
+                otFeatures: { ...state.otFeatures }
+            });
+            
+            state.selectedLayer = state.layers.length - 1;
+            updateLayersList();
+            renderCanvas();
+            hideAllPanels();
+            showToast('تمت إضافة النص', 'success');
+        }
+
+        // ===== FONT OPERATIONS =====
+        async function loadFont(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const font = opentype.parse(arrayBuffer);
+                
+                // Create font face
+                const fontName = font.names.fontFamily?.en || file.name.replace(/\.[^.]+$/, '');
+                const fontFace = new FontFace(fontName, arrayBuffer);
+                await fontFace.load();
+                document.fonts.add(fontFace);
+                
+                // Get OpenType features
+                const features = getOpenTypeFeatures(font);
+                
+                // Store font data
+                state.loadedFonts.push({
+                    name: fontName,
+                    family: fontName,
+                    features: features,
+                    openTypeFont: font,
+                    variableAxes: font.tables.fvar?.axes || []
+                });
+                
+                state.openTypeFont = font;
+                
+                // Update font list
+                const fontList = document.getElementById('fontList');
+                const fontItem = document.createElement('div');
+                fontItem.className = 'font-item';
+                fontItem.onclick = function() { selectFont(fontName, this); };
+                fontItem.innerHTML = `
+                    <div>
+                        <div class="name" style="font-family: '${fontName}'">${fontName}</div>
+                        <div class="info">${features.length} خاصية OpenType</div>
+                    </div>
+                    <div class="features-count">${features.length} خصائص</div>
+                `;
+                fontList.appendChild(fontItem);
+                
+                // Check for variable font axes
+                if (font.tables.fvar?.axes?.length > 0) {
+                    displayVariableAxes(font.tables.fvar.axes);
+                }
+                
+                selectFont(fontName, fontItem);
+                showToast(`تم تحميل الخط: ${fontName}`, 'success');
+                
+            } catch (error) {
+                console.error('Error loading font:', error);
+                showToast('فشل تحميل الخط', 'error');
+            }
+        }
+
+        function getOpenTypeFeatures(font) {
+            const features = [];
+            
+            // GSUB features
+            if (font.tables.gsub) {
+                font.tables.gsub.features?.forEach(feature => {
+                    if (!features.includes(feature.tag)) {
+                        features.push(feature.tag);
+                    }
+                });
+            }
+            
+            // GPOS features
+            if (font.tables.gpos) {
+                font.tables.gpos.features?.forEach(feature => {
+                    if (!features.includes(feature.tag)) {
+                        features.push(feature.tag);
+                    }
+                });
+            }
+            
+            return features;
+        }
+
+        function displayVariableAxes(axes) {
+            const container = document.getElementById('variableAxes');
+            const slidersContainer = document.getElementById('axesSliders');
+            
+            container.style.display = 'block';
+            slidersContainer.innerHTML = '';
+            
+            axes.forEach(axis => {
+                const div = document.createElement('div');
+                div.className = 'slider-group';
+                div.innerHTML = `
+                    <div class="slider-label">
+                        <span>${axis.name?.en || axis.tag}</span>
+                        <span class="slider-value" id="${axis.tag}Value">${axis.defaultValue}</span>
+                    </div>
+                    <input type="range" class="slider" 
+                           min="${axis.minValue}" max="${axis.maxValue}" 
+                           value="${axis.defaultValue}" 
+                           oninput="updateVariableAxis('${axis.tag}', this.value)">
+                `;
+                slidersContainer.appendChild(div);
+                
+                state.variableAxes[axis.tag] = axis.defaultValue;
+            });
+        }
+
+        function updateVariableAxis(tag, value) {
+            state.variableAxes[tag] = parseFloat(value);
+            document.getElementById(tag + 'Value').innerText = value;
+            
+            const variationSettings = Object.entries(state.variableAxes)
+                .map(([k, v]) => `"${k}" ${v}`)
+                .join(', ');
+            
+            document.getElementById('previewText').style.fontVariationSettings = variationSettings;
+            
+            if (state.selectedLayer !== null) {
+                state.layers[state.selectedLayer].variationSettings = variationSettings;
+                renderCanvas();
+            }
+        }
+
+        function selectFont(fontName, element) {
+            state.currentFont = fontName;
+            
+            document.querySelectorAll('.font-item').forEach(el => el.classList.remove('active'));
+            if (element) element.classList.add('active');
+            
+            document.getElementById('previewText').style.fontFamily = `"${fontName}"`;
+            
+            // Find font and update available features
+            const fontData = state.loadedFonts.find(f => f.name === fontName);
+            if (fontData) {
+                state.openTypeFont = fontData.openTypeFont;
+                highlightAvailableFeatures(fontData.features);
+                
+                if (fontData.variableAxes?.length > 0) {
+                    displayVariableAxes(fontData.variableAxes);
+                } else {
+                    document.getElementById('variableAxes').style.display = 'none';
+                }
+            }
+            
+            if (state.selectedLayer !== null && state.layers[state.selectedLayer]?.type === 'text') {
+                state.layers[state.selectedLayer].font = fontName;
+                renderCanvas();
+            }
+            
+            showToast(`تم اختيار الخط: ${fontName}`, 'success');
+        }
+
+        function highlightAvailableFeatures(features) {
+            document.querySelectorAll('.ot-feature').forEach(el => {
+                const code = el.querySelector('.code').innerText;
+                if (features.includes(code)) {
+                    el.style.opacity = '1';
+                } else {
+                    el.style.opacity = '0.5';
+                }
+            });
+        }
+
+        // ===== OPENTYPE FEATURES =====
+        function toggleOTFeature(feature, element) {
+            state.otFeatures[feature] = !state.otFeatures[feature];
+            element.classList.toggle('active');
+            
+            updatePreviewFeatures();
+        }
+
+        function buildFontFeatures() {
+            return Object.entries(state.otFeatures)
+                .map(([feature, enabled]) => `"${feature}" ${enabled ? 1 : 0}`)
+                .join(', ');
+        }
+
+        function updatePreviewFeatures() {
+            const features = buildFontFeatures();
+            document.getElementById('previewText').style.fontFeatureSettings = features;
+        }
+
+        function showOTTab(tabId, button) {
+            document.querySelectorAll('.ot-tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tabs .tab').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).style.display = 'block';
+            button.classList.add('active');
+        }
+
+        function applyOTFeatures() {
+            if (state.selectedLayer !== null && state.layers[state.selectedLayer]?.type === 'text') {
+                state.layers[state.selectedLayer].otFeatures = { ...state.otFeatures };
+                renderCanvas();
+            }
+            
+            hideAllPanels();
+            showToast('تم تطبيق الخصائص', 'success');
+        }
+
+        // ===== SHAPE OPERATIONS =====
+        function addShape(shapeType) {
+            saveHistory();
+            
+            state.layers.push({
+                type: 'shape',
+                shape: shapeType,
+                x: state.canvas.width / 2,
+                y: state.canvas.height / 2,
+                size: 150,
+                color: state.shapeColor,
+                opacity: 1,
+                visible: true
+            });
+            
+            state.selectedLayer = state.layers.length - 1;
+            updateLayersList();
+            renderCanvas();
+            showToast('تمت إضافة الشكل', 'success');
+        }
+
+        function setShapeColor(color, element) {
+            state.shapeColor = color;
+            document.querySelectorAll('#shapeColors .color-option').forEach(el => el.classList.remove('active'));
+            if (element) element.classList.add('active');
+            
+            if (state.selectedLayer !== null && state.layers[state.selectedLayer]?.type === 'shape') {
+                state.layers[state.selectedLayer].color = color;
+                renderCanvas();
+            }
+        }
+
+        function updateShapeOpacity(value) {
+            document.getElementById('shapeOpacityValue').innerText = value + '%';
+            
+            if (state.selectedLayer !== null && state.layers[state.selectedLayer]?.type === 'shape') {
+                state.layers[state.selectedLayer].opacity = value / 100;
+                renderCanvas();
+            }
+        }
+
+        // ===== IMAGE OPERATIONS =====
+        function loadImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    state.backgroundImage = img;
+                    renderCanvas();
+                    hideAllPanels();
+                    showToast('تم تحميل الصورة', 'success');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateImageOpacity(value) {
+            state.imageOpacity = value / 100;
+            document.getElementById('imageOpacityValue').innerText = value + '%';
+            renderCanvas();
+        }
+
+        function removeBackgroundImage() {
+            state.backgroundImage = null;
+            renderCanvas();
+            showToast('تم إزالة الصورة', 'success');
+        }
+
+        // ===== LAYERS OPERATIONS =====
+        function updateLayersList() {
+            const container = document.getElementById('layersList');
+            container.innerHTML = '';
+            
+            state.layers.slice().reverse().forEach((layer, reverseIndex) => {
+                const index = state.layers.length - 1 - reverseIndex;
+                const div = document.createElement('div');
+                div.className = `layer-item ${index === state.selectedLayer ? 'active' : ''} fade-in`;
+                div.onclick = function() { selectLayer(index); };
+                
+                let icon = '📄';
+                let name = 'طبقة';
+                
+                if (layer.type === 'text') {
+                    icon = '✏️';
+                    name = layer.text.substring(0, 20) + (layer.text.length > 20 ? '...' : '');
+                } else if (layer.type === 'shape') {
+                    const shapeIcons = {
+                        rectangle: '▬', square: '⬜', circle: '⬤', triangle: '▲',
+                        star: '★', heart: '❤', arrow: '➤', hexagon: '⬡'
+                    };
+                    icon = shapeIcons[layer.shape] || '⬡';
+                    name = 'شكل ' + layer.shape;
+                } else if (layer.type === 'image') {
+                    icon = '🖼️';
+                    name = 'صورة';
+                }
+                
+                div.innerHTML = `
+                    <div class="layer-thumb">${icon}</div>
+                    <div class="layer-info">
+                        <div class="layer-name">${name}</div>
+                        <div class="layer-type">${layer.type === 'text' ? 'نص' : layer.type === 'shape' ? 'شكل' : 'صورة'}</div>
+                    </div>
+                    <div class="layer-actions">
+                        <button onclick="event.stopPropagation(); toggleLayerVisibility(${index})">${layer.visible ? '👁️' : '🚫'}</button>
+                        <button onclick="event.stopPropagation(); deleteLayer(${index})">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function selectLayer(index) {
+            state.selectedLayer = index;
+            updateLayersList();
+            renderCanvas();
+            
+            // Update UI based on selected layer
+            const layer = state.layers[index];
+            if (layer?.type === 'text') {
+                document.getElementById('textInput').value = layer.text;
+                document.getElementById('fontSize').value = layer.fontSize || 72;
+                document.getElementById('fontSizeValue').innerText = (layer.fontSize || 72) + 'px';
+            }
+        }
+
+        function toggleLayerVisibility(index) {
+            state.layers[index].visible = !state.layers[index].visible;
+            updateLayersList();
+            renderCanvas();
+        }
+
+        function deleteLayer(index) {
+            saveHistory();
+            state.layers.splice(index, 1);
+            
+            if (state.selectedLayer >= state.layers.length) {
+                state.selectedLayer = state.layers.length - 1;
+            }
+            if (state.selectedLayer < 0) state.selectedLayer = null;
+            
+            updateLayersList();
+            renderCanvas();
+            showToast('تم حذف الطبقة', 'success');
+        }
+
+        function clearAllLayers() {
+            if (confirm('هل أنت متأكد من حذف جميع الطبقات؟')) {
+                saveHistory();
+                state.layers = [];
+                state.selectedLayer = null;
+                updateLayersList();
+                renderCanvas();
+                hideAllPanels();
+                showToast('تم مسح جميع الطبقات', 'success');
+            }
+        }
+
+        // ===== FILTER OPERATIONS =====
+        function applyFilter(filterType) {
+            state.currentFilter = filterType;
+            renderCanvas();
+        }
+
+        function applyCanvasFilter() {
+            const imageData = state.ctx.getImageData(0, 0, state.canvas.width, state.canvas.height);
+            const data = imageData.data;
+            const intensity = state.filterIntensity / 100;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                
+                switch (state.currentFilter) {
+                    case 'grayscale':
+                        const gray = (r + g + b) / 3;
+                        data[i] = r + (gray - r) * intensity;
+                        data[i + 1] = g + (gray - g) * intensity;
+                        data[i + 2] = b + (gray - b) * intensity;
+                        break;
+                    case 'sepia':
+                        data[i] = Math.min(255, r + (r * 0.393 + g * 0.769 + b * 0.189 - r) * intensity);
+                        data[i + 1] = Math.min(255, g + (r * 0.349 + g * 0.686 + b * 0.168 - g) * intensity);
+                        data[i + 2] = Math.min(255, b + (r * 0.272 + g * 0.534 + b * 0.131 - b) * intensity);
+                        break;
+                    case 'invert':
+                        data[i] = r + (255 - r - r) * intensity;
+                        data[i + 1] = g + (255 - g - g) * intensity;
+                        data[i + 2] = b + (255 - b - b) * intensity;
+                        break;
+                    case 'brightness':
+                        const brightnessAdjust = (intensity - 0.5) * 100;
+                        data[i] = Math.min(255, Math.max(0, r + brightnessAdjust));
+                        data[i + 1] = Math.min(255, Math.max(0, g + brightnessAdjust));
+                        data[i + 2] = Math.min(255, Math.max(0, b + brightnessAdjust));
+                        break;
+                    case 'contrast':
+                        const contrastFactor = (intensity * 2);
+                        data[i] = Math.min(255, Math.max(0, ((r - 128) * contrastFactor) + 128));
+                        data[i + 1] = Math.min(255, Math.max(0, ((g - 128) * contrastFactor) + 128));
+                        data[i + 2] = Math.min(255, Math.max(0, ((b - 128) * contrastFactor) + 128));
+                        break;
+                    case 'saturate':
+                        const sat = intensity * 2;
+                        const grayVal = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                        data[i] = Math.min(255, Math.max(0, grayVal + sat * (r - grayVal)));
+                        data[i + 1] = Math.min(255, Math.max(0, grayVal + sat * (g - grayVal)));
+                        data[i + 2] = Math.min(255, Math.max(0, grayVal + sat * (b - grayVal)));
+                        break;
+                }
+            }
+            
+            state.ctx.putImageData(imageData, 0, 0);
+        }
+
+        function updateFilterIntensity(value) {
+            state.filterIntensity = parseInt(value);
+            document.getElementById('filterIntensityValue').innerText = value + '%';
+            renderCanvas();
+        }
+
+        // ===== TOUCH EVENTS =====
+        function setupTouchEvents() {
+            const canvas = state.canvas;
+            
+            canvas.addEventListener('mousedown', handleDragStart);
+            canvas.addEventListener('mousemove', handleDragMove);
+            canvas.addEventListener('mouseup', handleDragEnd);
+            canvas.addEventListener('mouseleave', handleDragEnd);
+            
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleDragEnd);
+        }
+
+        function getCanvasCoords(event) {
+            const rect = state.canvas.getBoundingClientRect();
+            const scaleX = state.canvas.width / rect.width;
+            const scaleY = state.canvas.height / rect.height;
+            
+            return {
+                x: (event.clientX - rect.left) * scaleX,
+                y: (event.clientY - rect.top) * scaleY
+            };
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            handleDragStart({ clientX: touch.clientX, clientY: touch.clientY });
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            handleDragMove({ clientX: touch.clientX, clientY: touch.clientY });
+        }
+
+        function handleDragStart(e) {
+            const coords = getCanvasCoords(e);
+            
+            // Check if clicking on a layer
+            for (let i = state.layers.length - 1; i >= 0; i--) {
+                const layer = state.layers[i];
+                if (!layer.visible) continue;
+                
+                const layerWidth = layer.width || 100;
+                const layerHeight = layer.height || 50;
+                
+                if (coords.x >= layer.x - layerWidth/2 && coords.x <= layer.x + layerWidth/2 &&
+                    coords.y >= layer.y - layerHeight/2 && coords.y <= layer.y + layerHeight/2) {
+                    
+                    state.isDragging = true;
+                    state.dragLayer = i;
+                    state.dragOffset = {
+                        x: coords.x - layer.x,
+                        y: coords.y - layer.y
+                    };
+                    state.selectedLayer = i;
+                    updateLayersList();
+                    renderCanvas();
+                    return;
+                }
+            }
+            
+            // Deselect if clicking empty area
+            state.selectedLayer = null;
+            updateLayersList();
+            renderCanvas();
+        }
+
+        function handleDragMove(e) {
+            if (!state.isDragging || state.dragLayer === null) return;
+            
+            const coords = getCanvasCoords(e);
+            state.layers[state.dragLayer].x = coords.x - state.dragOffset.x;
+            state.layers[state.dragLayer].y = coords.y - state.dragOffset.y;
+            
+            renderCanvas();
+        }
+
+        function handleDragEnd() {
+            if (state.isDragging) {
+                saveHistory();
+            }
+            state.isDragging = false;
+            state.dragLayer = null;
+        }
+
+        // ===== HISTORY (UNDO/REDO) =====
+        function saveHistory() {
+            state.historyIndex++;
+            state.history = state.history.slice(0, state.historyIndex);
+            state.history.push(JSON.stringify(state.layers));
+            
+            // Limit history
+            if (state.history.length > 50) {
+                state.history.shift();
+                state.historyIndex--;
+            }
+        }
+
+        function undo() {
+            if (state.historyIndex > 0) {
+                state.historyIndex--;
+                state.layers = JSON.parse(state.history[state.historyIndex]);
+                state.selectedLayer = null;
+                updateLayersList();
+                renderCanvas();
+                showToast('تم التراجع', 'success');
+            } else {
+                showToast('لا يوجد المزيد للتراجع', 'error');
+            }
+        }
+
+        function redo() {
+            if (state.historyIndex < state.history.length - 1) {
+                state.historyIndex++;
+                state.layers = JSON.parse(state.history[state.historyIndex]);
+                state.selectedLayer = null;
+                updateLayersList();
+                renderCanvas();
+                showToast('تم الإعادة', 'success');
+            } else {
+                showToast('لا يوجد المزيد للإعادة', 'error');
+            }
+        }
+
+        // ===== EXPORT =====
+        function exportImage() {
+            // Temporarily hide selection
+            const selectedBackup = state.selectedLayer;
+            state.selectedLayer = null;
+            renderCanvas();
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = 'font-studio-design.png';
+            link.href = state.canvas.toDataURL('image/png', 1.0);
+            link.click();
+            
+            // Restore selection
+            state.selectedLayer = selectedBackup;
+            renderCanvas();
+            
+            showToast('تم تصدير الصورة بنجاح! 🎉', 'success');
+        }
+
+        // ===== UI HELPERS =====
+        function showPanel(panelId) {
+            hideAllPanels();
+            document.getElementById(panelId).classList.add('active');
+            document.querySelector('.backdrop').classList.add('active');
+        }
+
+        function hideAllPanels() {
+            document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelector('.backdrop').classList.remove('active');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.innerText = (type === 'success' ? '✓ ' : '✕ ') + message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize history
+        saveHistory();
+    </script>
+</body>
+</html>
