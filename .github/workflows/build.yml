@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout repository
+    - name: Checkout
       uses: actions/checkout@v4
     
     - name: Setup Node.js
@@ -20,7 +20,7 @@ jobs:
       with:
         node-version: '20'
     
-    - name: Setup Java JDK
+    - name: Setup Java
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
@@ -30,24 +30,22 @@ jobs:
       uses: android-actions/setup-android@v3
     
     - name: Install dependencies
-      run: npm install --legacy-peer-deps
+      run: npm install
     
-    - name: Add Android platform
+    - name: Add Android
       run: npx cap add android || true
     
-    - name: Sync Capacitor
+    - name: Sync
       run: npx cap sync android
     
-    - name: Make gradlew executable
-      run: chmod +x android/gradlew
-    
-    - name: Build Debug APK
+    - name: Build APK
       working-directory: android
-      run: ./gradlew assembleDebug --no-daemon
+      run: |
+        chmod +x gradlew
+        ./gradlew assembleDebug --no-daemon
     
-    - name: Upload Debug APK
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: font-studio-debug-apk
+        name: FontStudio-APK
         path: android/app/build/outputs/apk/debug/app-debug.apk
-        retention-days: 30
