@@ -1,6 +1,6 @@
 {
-  "appId": "com.fontstudio.app",
-  "appName": "فونت ستوديو",
+  "appId": "com.fontstudio.pro",
+  "appName": "فونت ستوديو برو",
   "webDir": "www",
   "server": {
     "androidScheme": "https"
@@ -8,8 +8,15 @@
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 2000,
-      "backgroundColor": "#667eea",
-      "showSpinner": false
+      "backgroundColor": "#1a1a2e",
+      "showSpinner": true,
+      "spinnerColor": "#667eea"
+    },
+    "Filesystem": {
+      "directory": "Documents"
+    },
+    "Permissions": {
+      "permissions": ["storage", "camera", "photos"]
     }
   },
   "android": {
@@ -17,7 +24,14 @@
       "keystorePath": null,
       "keystoreAlias": null
     },
-    "minSdkVersion": 22,
-    "targetSdkVersion": 34
+    "minSdkVersion": 23,
+    "targetSdkVersion": 34,
+    "permissions": [
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.WRITE_EXTERNAL_STORAGE",
+      "android.permission.READ_MEDIA_IMAGES",
+      "android.permission.CAMERA",
+      "android.permission.INTERNET"
+    ]
   }
 }
