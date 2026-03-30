@@ -1,7 +1,7 @@
 {
   "name": "font-studio-pro",
   "version": "2.0.0",
-  "description": "تطبيق فونت ستوديو برو - محرر صور احترافي مع OpenType",
+  "description": "فونت ستوديو برو - محرر صور احترافي",
   "main": "index.html",
   "scripts": {
     "build": "npx cap sync android"
@@ -11,10 +11,7 @@
     "@capacitor/core": "5.7.0",
     "@capacitor/cli": "5.7.0",
     "@capacitor/filesystem": "5.2.0",
-    "@capacitor/share": "5.0.0",
-    "@capacitor/permissions": "5.0.0",
-    "@capacitor/camera": "5.0.0",
-    "@capacitor/media": "5.0.0"
+    "@capacitor/share": "5.0.0"
   },
   "author": "Font Studio Team",
   "license": "MIT"
